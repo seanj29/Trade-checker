@@ -6,7 +6,7 @@ namespace HelloWorld
     {
         static void Main(string[] args)
         {
-            using var watcher = new FileSystemWatcher(@"C:\Users\seano\OneDrive\Documents\Coding\C Sharp\temp");
+            using var watcher = new FileSystemWatcher(@"D:\temp");
 
              watcher.NotifyFilter = NotifyFilters.Attributes
                                  | NotifyFilters.CreationTime
@@ -19,9 +19,10 @@ namespace HelloWorld
 
             watcher.Changed += OnChanged;
             watcher.Created += OnCreated;
+            watcher.Error += OnError;
 
-            watcher.Filter = "Trades.csv";
-            watcher.IncludeSubdirectories = true;
+            watcher.Filter = "*.txt";
+            watcher.IncludeSubdirectories = false;
             watcher.EnableRaisingEvents = true;
 
             Console.WriteLine("Press enter to exit.");
@@ -40,5 +41,19 @@ namespace HelloWorld
             string value = $"Created: {e.FullPath}";
             Console.WriteLine(value);
         }
+         private static void OnError(object sender, ErrorEventArgs e) =>
+            PrintException(e.GetException());
+
+        private static void PrintException(Exception? ex)
+        {
+            if (ex != null)
+            {
+                Console.WriteLine($"Message: {ex.Message}");
+                Console.WriteLine("Stacktrace:");
+                Console.WriteLine(ex.StackTrace);
+                Console.WriteLine();
+                PrintException(ex.InnerException);
+            }
     }
+}
 }
