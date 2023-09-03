@@ -20,7 +20,7 @@ namespace HelloWorld
             watcher.Changed += OnChanged;
             watcher.Created += OnCreated;
 
-            watcher.Filter = "";
+            watcher.Filter = "Trades.csv";
             watcher.IncludeSubdirectories = true;
             watcher.EnableRaisingEvents = true;
 
