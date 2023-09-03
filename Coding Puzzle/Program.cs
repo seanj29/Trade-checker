@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using Microsoft.Data.Sqlite;
 using dotenv.net;
 using FileHelpers;
 namespace Coding_Puzzle;
@@ -10,12 +10,54 @@ class Program
             DotEnv.Load(options: new DotEnvOptions(ignoreExceptions: false));
             var path = DotEnv.Read()["PATH"];
             var engine = new FileHelperEngine<Trade>();
-            if (File.Exists(path)) {
-               
-                var result = engine.ReadFile(path);
-                foreach (Trade trades in result) {
-                    Console.WriteLine($"Trade = {trades.TradeID} {trades.ISIN} {trades.Notional}");
-                }
+            if (File.Exists($"{path}Trades.csv")) {
+               using var connection = new SqliteConnection(@$"Data Source={path}Trade.db");
+               connection.Open();
+               using (SqliteCommand command = connection.CreateCommand()){
+
+               command.CommandText = 
+               @"
+                CREATE TABLE IF NOT EXISTS Trade (
+                    TradeID TEXT, 
+                    ISIN TEXT, 
+                    Notional INTEGER)
+               ";
+                int rows = command.ExecuteNonQuery();
+               }
+               var results = engine.ReadFile($"{path}Trades.csv");
+            foreach(Trade trades in results){
+                
+               using (SqliteCommand command = connection.CreateCommand()){
+
+                command.CommandText = 
+                @"INSERT INTO Trade (TradeID, ISIN, Notional) 
+                VALUES (@tradeid,@isin,@notional)";
+                command.Parameters.AddWithValue("@tradeid",trades.TradeID);
+                command.Parameters.AddWithValue("@isin",trades.ISIN);
+                command.Parameters.AddWithValue("@notional",trades.Notional);  
+
+                int rowsAffected = command.ExecuteNonQuery();
+               if (rowsAffected > 0)
+                    {
+                        Console.WriteLine($"Trade '{trades.TradeID}' inserted successfully!");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Failed to insert product '{trades.TradeID}'.");
+                    }
+               }
+
+
+            }
+               using (SqliteCommand command = connection.CreateCommand()){
+                command.CommandText = 
+                @"SELECT * FROM Trade";
+               SqliteDataReader myReader = command.ExecuteReader();
+               while (myReader.Read()){
+                Console.WriteLine(myReader["TradeID"] + " " + myReader["ISIN"] + " " + myReader["Notional"]);
+               }
+               }
+
             }
 
             else {

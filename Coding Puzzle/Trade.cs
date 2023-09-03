@@ -10,7 +10,7 @@ namespace Coding_Puzzle
         public string? TradeID;
 
         public string? ISIN;
-    /// <summary>
+        /// <summary>
     /// Converts Notional to int 32
     /// </summary>
         [FieldConverter(ConverterKind.Int32)]
