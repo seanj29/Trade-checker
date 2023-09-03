@@ -1,7 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using dotenv.net;
 using FileHelpers;
-using System.Runtime.CompilerServices;
 
 namespace Coding_Puzzle;
 
@@ -9,6 +8,7 @@ class Program
     {
         static void Main(string[] args)
         {   
+           
             DotEnv.Load(options: new DotEnvOptions(ignoreExceptions: false));
 
             string path = DotEnv.Read()["PATH"];
@@ -65,34 +65,38 @@ class Program
 
             using var connection = new SqliteConnection(@$"Data Source={parentDirectory}\Trade.db");
             connection.Open();
-
+            using (SqliteCommand command = connection.CreateCommand()){
+                // Deletes any current entries in the db before creating new ones.
+                command.CommandText = 
+                @"DELETE FROM Trade";
+             }
             var results = engine.ReadFile(@$"{parentDirectory}\Trades.csv");
             foreach(Trade trades in results){
                 
                using (SqliteCommand command = connection.CreateCommand()){
 
-                command.CommandText = 
-                @"INSERT INTO Trade (TradeID, ISIN, Notional) 
-                VALUES (@tradeid,@isin,@notional)";
-                command.Parameters.AddWithValue("@tradeid",trades.TradeID);
-                command.Parameters.AddWithValue("@isin",trades.ISIN);
-                command.Parameters.AddWithValue("@notional",trades.Notional);  
+                    command.CommandText = 
+                    @"INSERT INTO Trade (TradeID, ISIN, Notional) 
+                    VALUES (@tradeid,@isin,@notional)";
+                    command.Parameters.AddWithValue("@tradeid",trades.TradeID);
+                    command.Parameters.AddWithValue("@isin",trades.ISIN);
+                    command.Parameters.AddWithValue("@notional",trades.Notional);  
 
-                int rowsAffected = command.ExecuteNonQuery();
-               if (rowsAffected > 0)
-                    {
-                        Console.WriteLine($"Trade '{trades.TradeID}' inserted successfully!");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Failed to insert product '{trades.TradeID}'.");
-                    }
-               }
+                    int rowsAffected = command.ExecuteNonQuery();
+                    if (rowsAffected > 0)
+                        {
+                            Console.WriteLine($"Trade '{trades.TradeID}' inserted successfully!");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Failed to insert product '{trades.TradeID}'.");
+                        }
+                }
 
 
             }
-            string value = $"Created: {e.FullPath}";
-            Console.WriteLine(value);
+            File.Move(e.FullPath, $@"{parentDirectory}\archive\Trades.csv {DateTime.Now}");
+            Console.WriteLine($@"{parentDirectory}\archive\Trades.csv {DateTime.Now}");
         }
          private static void OnError(object sender, ErrorEventArgs e) =>
             PrintException(e.GetException());
