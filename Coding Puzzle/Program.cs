@@ -17,6 +17,7 @@ class Program
 
             connection.Open();
 
+            // Creates table
             using (SqliteCommand command = connection.CreateCommand()){
 
                command.CommandText = 
@@ -28,14 +29,10 @@ class Program
                ";
                 int rows = command.ExecuteNonQuery();
                }
-               using (SqliteCommand command = connection.CreateCommand()){
-                command.CommandText = 
-                @"SELECT * FROM Trade";
-               SqliteDataReader myReader = command.ExecuteReader();
-               while (myReader.Read()){
-                Console.WriteLine(myReader["TradeID"] + " " + myReader["ISIN"] + " " + myReader["Notional"]);
-               }
-               }
+
+            // <summary>
+            // File system watcher checks for any changes in the directory
+            // </summary
             using var watcher = new FileSystemWatcher(@"D:\temp");
 
                 watcher.NotifyFilter = NotifyFilters.Attributes
@@ -58,6 +55,8 @@ class Program
                 Console.WriteLine("Press enter to exit.");
                 Console.ReadLine();          
         }
+
+        //Event for when file is created/added to a directory
          private static void OnCreated(object sender, FileSystemEventArgs e)
         {
             string? parentDirectory = Path.GetDirectoryName(e.FullPath);
