@@ -46,6 +46,7 @@ class Program
         // File system watcher checks for any changes in the directory
         // </summary
         log.Information(@"Monitoring for changes in the C:\temp directory");
+        log.Dispose();
         using var watcher = new FileSystemWatcher(@"C:\temp");
 
         watcher.NotifyFilter = NotifyFilters.Attributes
@@ -66,8 +67,12 @@ class Program
 
         Console.WriteLine("Press enter to exit.");
         Console.ReadLine();
-        log.Information("Closing Connection...");
-        log.Information("Exiting Program...");
+        using var log2 = new LoggerConfiguration()
+        .WriteTo.File("process-logs.txt")
+        .CreateLogger();
+        log2.Information("Closing Connection...");
+        log2.Information("Exiting Program...");
+        log2.Dispose();
     }
 
     // Event for when file is created/added to a directory
@@ -126,6 +131,7 @@ class Program
         log.Information("Moving Trades.csv to archive...");
         log.Information($"New File Path: {destinationFilePath} ");
         File.Move(sourceFilePath, destinationFilePath);
+        log.Dispose();
     }
 
     private static void OnError(object sender, ErrorEventArgs e) =>
