@@ -33,7 +33,7 @@ class Program
             // <summary>
             // File system watcher checks for any changes in the directory
             // </summary
-            using var watcher = new FileSystemWatcher(@"D:\temp");
+            using var watcher = new FileSystemWatcher(@"C:\temp");
 
                 watcher.NotifyFilter = NotifyFilters.Attributes
                                 | NotifyFilters.CreationTime
@@ -95,8 +95,11 @@ class Program
 
 
             }
-            File.Move(e.FullPath, $@"{parentDirectory}\archive\Trades.csv {DateTime.Now}");
-            Console.WriteLine($@"{parentDirectory}\archive\Trades.csv {DateTime.Now}");
+            string sourceFilePath = e.FullPath;
+            string destinationFilePath = @"C:\temp\archive\Trades " + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".csv";
+            File.Move(sourceFilePath, destinationFilePath);
+            Console.WriteLine($@"{e.FullPath}");
+            Console.WriteLine(destinationFilePath);
         }
          private static void OnError(object sender, ErrorEventArgs e) =>
             PrintException(e.GetException());
